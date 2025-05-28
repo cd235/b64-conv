@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Download Report</title>
+</head>
+<body>
+  <h2>Preparing your download...</h2>
+  <script>
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    function downloadPDF(base64, filename = 'report.pdf') {
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    const b64 = getQueryParam('b64');
+    if (b64) {
+      downloadPDF(b64);
+    } else {
+      document.body.innerHTML = "<h2>Error: No base64 found in URL.</h2>";
+    }
+  </script>
+</body>
+</html>
