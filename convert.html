@@ -1,42 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Download PDF</title>
+  <title>Download Report</title>
 </head>
 <body>
   <h2>Preparing your PDF...</h2>
   <script>
-    function getPostData(callback) {
-      document.body.innerHTML = '<form id="hiddenForm"><input name="b64"><input name="filename"></form>';
-      const form = document.forms[0];
-      callback(new FormData(form));
+    async function downloadFromBase64File(url, filename = "report.pdf") {
+      try {
+        const res = await fetch(url);
+        const base64 = await res.text();
+
+        const binary = atob(base64.trim());
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+
+        document.body.innerHTML = "<h2>Your download should begin shortly.</h2>";
+      } catch (err) {
+        document.body.innerHTML = "<h2>Error: Could not load file.</h2>";
+        console.error(err);
+      }
     }
 
-    function downloadPDF(base64, filename = 'report.pdf') {
-      const byteCharacters = atob(base64);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
+    const params = new URLSearchParams(window.location.search);
+    const fileURL = params.get("file");
+
+    if (fileURL) {
+      downloadFromBase64File(fileURL);
+    } else {
+      document.body.innerHTML = "<h2>Error: No file URL provided.</h2>";
     }
-
-    getPostData(formData => {
-      const b64 = formData.get("b64");
-      const filename = formData.get("filename") || "report.pdf";
-
-      if (!b64) {
-        document.body.innerHTML = "<h2>Error: No data received.</h2>";
-        return;
-      }
-
-      downloadPDF(b64, filename);
-    });
   </script>
 </body>
 </html>
