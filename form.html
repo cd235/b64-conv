@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sending your file...</title>
+</head>
+<body>
+  <form id="b64Form" method="POST" action="convert.html">
+    <input type="hidden" name="b64" id="b64">
+    <input type="hidden" name="filename" id="filename">
+  </form>
+
+  <script>
+    const base64 = atob("{{base64_encoded_to_base64}}");  /
+    const filename = "report.pdf";
+
+    document.getElementById("b64").value = base64;
+    document.getElementById("filename").value = filename;
+    document.getElementById("b64Form").submit();
+  </script>
+</body>
+</html>
