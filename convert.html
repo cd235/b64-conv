@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Download Report</title>
+  <title>Download PDF</title>
 </head>
 <body>
-  <h2>Preparing your download...</h2>
+  <h2>Preparing your PDF...</h2>
   <script>
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
+    function getPostData(callback) {
+      document.body.innerHTML = '<form id="hiddenForm"><input name="b64"><input name="filename"></form>';
+      const form = document.forms[0];
+      callback(new FormData(form));
     }
 
     function downloadPDF(base64, filename = 'report.pdf') {
@@ -25,12 +26,17 @@
       link.click();
     }
 
-    const b64 = getQueryParam('b64');
-    if (b64) {
-      downloadPDF(b64);
-    } else {
-      document.body.innerHTML = "<h2>Error: No base64 found in URL.</h2>";
-    }
+    getPostData(formData => {
+      const b64 = formData.get("b64");
+      const filename = formData.get("filename") || "report.pdf";
+
+      if (!b64) {
+        document.body.innerHTML = "<h2>Error: No data received.</h2>";
+        return;
+      }
+
+      downloadPDF(b64, filename);
+    });
   </script>
 </body>
 </html>
